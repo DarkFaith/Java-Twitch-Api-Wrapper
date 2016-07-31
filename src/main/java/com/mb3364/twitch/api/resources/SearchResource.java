@@ -16,7 +16,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class SearchResource extends AbstractResource {
+public class SearchResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -43,7 +44,7 @@ public class SearchResource extends AbstractResource {
         String url = String.format("%s/search/channels", getBaseUrl());
         params.put("q", query);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -83,7 +84,7 @@ public class SearchResource extends AbstractResource {
         String url = String.format("%s/search/streams", getBaseUrl());
         params.put("q", query);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -121,7 +122,7 @@ public class SearchResource extends AbstractResource {
         params.put("q", query);
         params.put("type", "suggest");
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

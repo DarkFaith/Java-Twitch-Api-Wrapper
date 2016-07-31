@@ -13,7 +13,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class RootResource extends AbstractResource {
+public class RootResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -34,7 +35,7 @@ public class RootResource extends AbstractResource {
     public void get(final TokenResponseHandler handler) {
         String url = String.format("%s/", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

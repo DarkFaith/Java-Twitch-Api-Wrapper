@@ -14,7 +14,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class GamesResource extends AbstractResource {
+public class GamesResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -39,7 +40,7 @@ public class GamesResource extends AbstractResource {
     public void getTop(final RequestParams params, final TopGamesResponseHandler handler) {
         String url = String.format("%s/games/top", getBaseUrl());
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

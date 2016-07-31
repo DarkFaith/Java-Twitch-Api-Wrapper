@@ -13,7 +13,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class IngestsResource extends AbstractResource {
+public class IngestsResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -33,7 +34,7 @@ public class IngestsResource extends AbstractResource {
     public void get(final IngestsResponseHandler handler) {
         String url = String.format("%s/ingests", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

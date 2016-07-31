@@ -15,7 +15,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class UsersResource extends AbstractResource {
+public class UsersResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -36,7 +37,7 @@ public class UsersResource extends AbstractResource {
     public void get(final String user, final UserResponseHandler handler) {
         String url = String.format("%s/users/%s", getBaseUrl(), user);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -58,7 +59,7 @@ public class UsersResource extends AbstractResource {
     public void get(final UserResponseHandler handler) {
         String url = String.format("%s/user", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -82,7 +83,7 @@ public class UsersResource extends AbstractResource {
     public void getSubscription(final String user, final String channel, final UserSubscriptionResponseHandler handler) {
         String url = String.format("%s/users/%s/subscriptions/%s", getBaseUrl(), user, channel);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -114,7 +115,7 @@ public class UsersResource extends AbstractResource {
     public void getFollows(final String user, final RequestParams params, final UserFollowsResponseHandler handler) {
         String url = String.format("%s/users/%s/follows/channels", getBaseUrl(), user);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -148,7 +149,7 @@ public class UsersResource extends AbstractResource {
     public void getFollow(final String user, final String channel, final UserFollowResponseHandler handler) {
         String url = String.format("%s/users/%s/follows/channels/%s", getBaseUrl(), user, channel);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -176,7 +177,7 @@ public class UsersResource extends AbstractResource {
         RequestParams params = new RequestParams();
         params.put("notifications", Boolean.toString(enableNotifications));
 
-        http.put(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.put(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -212,7 +213,7 @@ public class UsersResource extends AbstractResource {
     public void unfollow(final String user, final String channel, final UserUnfollowResponseHandler handler) {
         String url = String.format("%s/users/%s/follows/channels/%s", getBaseUrl(), user, channel);
 
-        http.delete(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.delete(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 handler.onSuccess();
@@ -236,7 +237,7 @@ public class UsersResource extends AbstractResource {
     public void getBlocks(final String user, final RequestParams params, final BlocksResponseHandler handler) {
         String url = String.format("%s/users/%s/blocks", getBaseUrl(), user);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -272,7 +273,7 @@ public class UsersResource extends AbstractResource {
     public void putBlock(final String user, final String target, final BlockResponseHandler handler) {
         String url = String.format("%s/users/%s/blocks/%s", getBaseUrl(), user, target);
 
-        http.put(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.put(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -296,7 +297,7 @@ public class UsersResource extends AbstractResource {
     public void deleteBlock(final String user, final String target, final UnblockResponseHandler handler) {
         String url = String.format("%s/users/%s/blocks/%s", getBaseUrl(), user, target);
 
-        http.delete(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.delete(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 handler.onSuccess();

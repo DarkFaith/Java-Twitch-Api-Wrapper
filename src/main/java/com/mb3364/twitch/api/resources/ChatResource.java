@@ -15,7 +15,8 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class ChatResource extends AbstractResource {
+public class ChatResource extends AbstractResource
+{
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -35,7 +36,7 @@ public class ChatResource extends AbstractResource {
     public void getEmoticons(final EmoticonsResponseHandler handler) {
         String url = String.format("%s/chat/emoticons", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -57,7 +58,7 @@ public class ChatResource extends AbstractResource {
     public void getBadges(final String channel, final BadgesResponseHandler handler) {
         String url = String.format("%s/chat/%s/badges", getBaseUrl(), channel);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

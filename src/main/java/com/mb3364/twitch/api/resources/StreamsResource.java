@@ -2,14 +2,8 @@ package com.mb3364.twitch.api.resources;
 
 import com.mb3364.http.RequestParams;
 import com.mb3364.twitch.api.auth.Scopes;
-import com.mb3364.twitch.api.handlers.FeaturedStreamResponseHandler;
-import com.mb3364.twitch.api.handlers.StreamResponseHandler;
-import com.mb3364.twitch.api.handlers.StreamsResponseHandler;
-import com.mb3364.twitch.api.handlers.StreamsSummaryResponseHandler;
-import com.mb3364.twitch.api.models.FeaturedStreamContainer;
-import com.mb3364.twitch.api.models.StreamContainer;
-import com.mb3364.twitch.api.models.Streams;
-import com.mb3364.twitch.api.models.StreamsSummary;
+import com.mb3364.twitch.api.handlers.*;
+import com.mb3364.twitch.api.models.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +15,10 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class StreamsResource extends AbstractResource {
+public class StreamsResource extends AbstractResource
+{
 
+    Stream stream = null;
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
      *
@@ -33,6 +29,40 @@ public class StreamsResource extends AbstractResource {
         super(baseUrl, apiVersion);
     }
 
+    final StreamResponseHandler streamResponseHandler = new StreamResponseHandler()
+    {
+
+        @Override
+        public void onSuccess(Stream stream)
+        {
+            StreamsResource.this.stream = stream;
+            setLastRequestSuccessful(true);
+        }
+
+        @Override
+        public void onFailure(int statusCode, String statusMessage, String errorMessage)
+        {
+            setLastRequestSuccessful(false);
+        }
+
+        @Override
+        public void onFailure(Throwable throwable)
+        {
+            setLastRequestSuccessful(false);
+        }
+    };
+
+    final TwitchHttpResponseHandler twitchHttpResponseHandler = new TwitchHttpResponseHandler(streamResponseHandler) {
+        @Override
+        public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
+            try {
+                Stream value = objectMapper.readValue(content, Stream.class);
+                streamResponseHandler.onSuccess(value);
+            } catch (IOException e) {
+                streamResponseHandler.onFailure(e);
+            }
+        }
+    };
     /**
      * Returns a stream object.
      * <p>The stream object in the onSuccess() response will be <code>null</code> if the stream is offline.</p>
@@ -43,7 +73,7 @@ public class StreamsResource extends AbstractResource {
     public void get(final String channelName, final StreamResponseHandler handler) {
         String url = String.format("%s/streams/%s", getBaseUrl(), channelName);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -55,6 +85,22 @@ public class StreamsResource extends AbstractResource {
             }
         });
     }
+
+    /**
+     * Synchronous version of com.mb3364.twitch.api.resources.ChannelsResource#get(com.mb3364.twitch.api.handlers.ChannelResponseHandler)
+     * Returns a channel object of authenticated user. Channel object includes stream key.
+     * <p>Authenticated, required scope: {@link Scopes#CHANNEL_READ}</p>
+
+     */
+    public Stream get(String channelName) {
+        String url = String.format("%s/stream/%s", getBaseUrl(), channelName);
+
+        HTTP_SYNC.get(url, twitchHttpResponseHandler);
+        if (isLastRequestSuccessful())
+            return stream;
+        else
+            return null;
+    };
 
     /**
      * Returns a list of stream objects that are queried by a number of parameters
@@ -73,7 +119,7 @@ public class StreamsResource extends AbstractResource {
     public void get(final RequestParams params, final StreamsResponseHandler handler) {
         String url = String.format("%s/streams", getBaseUrl());
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -109,7 +155,7 @@ public class StreamsResource extends AbstractResource {
     public void getFeatured(final RequestParams params, final FeaturedStreamResponseHandler handler) {
         String url = String.format("%s/streams/featured", getBaseUrl());
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -142,7 +188,7 @@ public class StreamsResource extends AbstractResource {
         RequestParams params = new RequestParams();
         params.put("game", game);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -163,7 +209,7 @@ public class StreamsResource extends AbstractResource {
     public void getSummary(final StreamsSummaryResponseHandler handler) {
         String url = String.format("%s/streams/summary", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -190,7 +236,7 @@ public class StreamsResource extends AbstractResource {
     public void getFollowed(final RequestParams params, final StreamsResponseHandler handler) {
         String url = String.format("%s/streams/followed", getBaseUrl());
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

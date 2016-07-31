@@ -15,7 +15,9 @@ import java.util.Map;
  *
  * @author Matthew Bell
  */
-public class ChannelsResource extends AbstractResource {
+public class ChannelsResource extends AbstractResource
+{
+    Channel channel = null;
 
     /**
      * Construct the resource using the Twitch API base URL and specified API version.
@@ -27,6 +29,41 @@ public class ChannelsResource extends AbstractResource {
         super(baseUrl, apiVersion);
     }
 
+    final ChannelResponseHandler channelResponseHandler = new ChannelResponseHandler()
+    {
+
+        @Override
+        public void onSuccess(Channel channel)
+        {
+            ChannelsResource.this.channel = channel;
+            setLastRequestSuccessful(true);
+        }
+
+        @Override
+        public void onFailure(int statusCode, String statusMessage, String errorMessage)
+        {
+            setLastRequestSuccessful(false);
+        }
+
+        @Override
+        public void onFailure(Throwable throwable)
+        {
+            setLastRequestSuccessful(false);
+        }
+    };
+
+    final TwitchHttpResponseHandler twitchHttpResponseHandler = new TwitchHttpResponseHandler(channelResponseHandler) {
+        @Override
+        public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
+            try {
+                Channel value = objectMapper.readValue(content, Channel.class);
+                channelResponseHandler.onSuccess(value);
+            } catch (IOException e) {
+                channelResponseHandler.onFailure(e);
+            }
+        }
+    };
+
     /**
      * Returns a channel object of authenticated user. Channel object includes stream key.
      * <p>Authenticated, required scope: {@link Scopes#CHANNEL_READ}</p>
@@ -36,7 +73,7 @@ public class ChannelsResource extends AbstractResource {
     public void get(final ChannelResponseHandler handler) {
         String url = String.format("%s/channel", getBaseUrl());
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -50,6 +87,22 @@ public class ChannelsResource extends AbstractResource {
     }
 
     /**
+     * Synchronous version of com.mb3364.twitch.api.resources.ChannelsResource#get(com.mb3364.twitch.api.handlers.ChannelResponseHandler)
+     * Returns a channel object of authenticated user. Channel object includes stream key.
+     * <p>Authenticated, required scope: {@link Scopes#CHANNEL_READ}</p>
+
+     */
+    public Channel get() {
+        String url = String.format("%s/channel", getBaseUrl());
+
+        HTTP_SYNC.get(url, twitchHttpResponseHandler);
+        if (isLastRequestSuccessful())
+            return channel;
+        else
+            return null;
+    };
+
+    /**
      * Returns a {@link Channel} object.
      *
      * @param channelName the name of the Channel
@@ -58,7 +111,7 @@ public class ChannelsResource extends AbstractResource {
     public void get(final String channelName, final ChannelResponseHandler handler) {
         String url = String.format("%s/channels/%s", getBaseUrl(), channelName);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -81,7 +134,7 @@ public class ChannelsResource extends AbstractResource {
     public void getEditors(final String channelName, final UsersResponseHandler handler) {
         String url = String.format("%s/channels/%s/editors", getBaseUrl(), channelName);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -125,7 +178,7 @@ public class ChannelsResource extends AbstractResource {
             params.remove("delay");
         }
 
-        http.put(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.put(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -148,7 +201,7 @@ public class ChannelsResource extends AbstractResource {
     public void resetStreamKey(final String channelName, final ChannelResponseHandler handler) {
         String url = String.format("%s/channels/%s/stream_key", getBaseUrl(), channelName);
 
-        http.delete(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.delete(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -177,7 +230,7 @@ public class ChannelsResource extends AbstractResource {
         RequestParams params = new RequestParams();
         params.put("length", Integer.toString(length));
 
-        http.post(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.post(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 handler.onSuccess();
@@ -194,7 +247,7 @@ public class ChannelsResource extends AbstractResource {
     public void getTeams(final String channelName, final TeamsResponseHandler handler) {
         String url = String.format("%s/channels/%s/teams", getBaseUrl(), channelName);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -224,7 +277,7 @@ public class ChannelsResource extends AbstractResource {
     public void getFollows(final String channelName, final RequestParams params, final ChannelFollowsResponseHandler handler) {
         String url = String.format("%s/channels/%s/follows", getBaseUrl(), channelName);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -270,7 +323,7 @@ public class ChannelsResource extends AbstractResource {
     public void getVideos(final String channelName, final RequestParams params, final VideosResponseHandler handler) {
         String url = String.format("%s/channels/%s/videos", getBaseUrl(), channelName);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -313,7 +366,7 @@ public class ChannelsResource extends AbstractResource {
     public void getSubscriptions(final String channelName, final RequestParams params, final ChannelSubscriptionsResponseHandler handler) {
         String url = String.format("%s/channels/%s/subscriptions", getBaseUrl(), channelName);
 
-        http.get(url, params, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, params, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {
@@ -349,7 +402,7 @@ public class ChannelsResource extends AbstractResource {
     public void getSubscription(final String channelName, final String user, final ChannelSubscriptionResponseHandler handler) {
         String url = String.format("%s/channels/%s/subscriptions/%s", getBaseUrl(), channelName, user);
 
-        http.get(url, new TwitchHttpResponseHandler(handler) {
+        HTTP_ASYNC.get(url, new TwitchHttpResponseHandler(handler) {
             @Override
             public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
                 try {

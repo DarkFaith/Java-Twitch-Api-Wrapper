@@ -3,7 +3,9 @@ package com.mb3364.twitch.api.resources;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.mb3364.http.AsyncHttpClient;
+import com.mb3364.http.HttpClient;
 import com.mb3364.http.StringHttpResponseHandler;
+import com.mb3364.http.SyncHttpClient;
 import com.mb3364.twitch.api.handlers.BaseFailureHandler;
 import com.mb3364.twitch.api.models.Error;
 
@@ -20,7 +22,10 @@ import java.util.Map;
 public abstract class AbstractResource {
 
     protected static final ObjectMapper objectMapper = new ObjectMapper(); // can reuse
-    protected static final AsyncHttpClient http = new AsyncHttpClient(); // can reuse
+    protected static final AsyncHttpClient HTTP_ASYNC = new AsyncHttpClient(); // can reuse
+    protected static final SyncHttpClient HTTP_SYNC = new SyncHttpClient(); // can reuse
+    private long lastSuccessfulUpdate = 0;
+    private boolean lastRequestSuccessful = false;
     private final String baseUrl; // Base url for twitch rest api
 
     /**
@@ -31,8 +36,27 @@ public abstract class AbstractResource {
      */
     protected AbstractResource(String baseUrl, int apiVersion) {
         this.baseUrl = baseUrl;
-        http.setHeader("ACCEPT", "application/vnd.twitchtv.v" + Integer.toString(apiVersion) + "+json"); // Specify API version
+        HTTP_ASYNC.setHeader("ACCEPT", "application/vnd.twitchtv.v" + Integer.toString(apiVersion) + "+json"); // Specify API version
+        HTTP_SYNC.setHeader("ACCEPT", "application/vnd.twitchtv.v" + Integer.toString(apiVersion) + "+json"); // Specify API version
         configureObjectMapper();
+    }
+
+    protected void setLastSuccessfulUpdate(long millis) {
+        lastSuccessfulUpdate = millis;
+    }
+
+    public long getLastSuccessfulUpdate() {
+        return lastSuccessfulUpdate;
+    }
+
+    public void setLastRequestSuccessful(boolean success) {
+        lastRequestSuccessful = success;
+        if (success)
+            setLastSuccessfulUpdate(System.currentTimeMillis());
+    }
+
+    public boolean isLastRequestSuccessful() {
+        return lastRequestSuccessful;
     }
 
     /**
@@ -50,9 +74,11 @@ public abstract class AbstractResource {
      */
     public void setAuthAccessToken(String accessToken) {
         if (accessToken != null && accessToken.length() > 0) {
-            http.setHeader("Authorization", String.format("OAuth %s", accessToken));
+            HTTP_ASYNC.setHeader("Authorization", String.format("OAuth %s", accessToken));
+            HTTP_SYNC.setHeader("Authorization", String.format("OAuth %s", accessToken));
         } else {
-            http.removeHeader("Authorization");
+            HTTP_ASYNC.removeHeader("Authorization");
+            HTTP_SYNC.removeHeader("Authorization");
         }
     }
 
@@ -63,9 +89,11 @@ public abstract class AbstractResource {
      */
     public void setClientId(String clientId) {
         if (clientId != null && clientId.length() > 0) {
-            http.setHeader("Client-ID", clientId);
+            HTTP_ASYNC.setHeader("Client-ID", clientId);
+            HTTP_SYNC.setHeader("Client-ID", clientId);
         } else {
-            http.removeHeader("Client-ID");
+            HTTP_ASYNC.removeHeader("Client-ID");
+            HTTP_SYNC.removeHeader("Client-ID");
         }
     }
 
