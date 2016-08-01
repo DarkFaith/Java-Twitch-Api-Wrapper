@@ -42,12 +42,14 @@ public class StreamsResource extends AbstractResource
         @Override
         public void onFailure(int statusCode, String statusMessage, String errorMessage)
         {
+            System.out.println("Twitch API get failed: " + statusCode);
             setLastRequestSuccessful(false);
         }
 
         @Override
         public void onFailure(Throwable throwable)
         {
+            System.out.println("Twitch API get failed (throw): " + throwable.getMessage());
             setLastRequestSuccessful(false);
         }
     };
@@ -56,8 +58,9 @@ public class StreamsResource extends AbstractResource
         @Override
         public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
             try {
-                Stream value = objectMapper.readValue(content, Stream.class);
-                streamResponseHandler.onSuccess(value);
+                System.out.println(content);
+                StreamContainer value = objectMapper.readValue(content, StreamContainer.class);
+                streamResponseHandler.onSuccess(value.getStream());
             } catch (IOException e) {
                 streamResponseHandler.onFailure(e);
             }
@@ -90,12 +93,11 @@ public class StreamsResource extends AbstractResource
      * Synchronous version of com.mb3364.twitch.api.resources.ChannelsResource#get(com.mb3364.twitch.api.handlers.ChannelResponseHandler)
      * Returns a channel object of authenticated user. Channel object includes stream key.
      * <p>Authenticated, required scope: {@link Scopes#CHANNEL_READ}</p>
-
      */
     public Stream get(String channelName) {
-        String url = String.format("%s/stream/%s", getBaseUrl(), channelName);
-
+        String url = String.format("%s/streams/%s", getBaseUrl(), channelName);
         HTTP_SYNC.get(url, twitchHttpResponseHandler);
+        System.out.println(stream);
         if (isLastRequestSuccessful())
             return stream;
         else

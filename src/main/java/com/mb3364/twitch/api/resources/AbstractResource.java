@@ -75,10 +75,10 @@ public abstract class AbstractResource {
     public void setAuthAccessToken(String accessToken) {
         if (accessToken != null && accessToken.length() > 0) {
             HTTP_ASYNC.setHeader("Authorization", String.format("OAuth %s", accessToken));
-            HTTP_SYNC.setHeader("Authorization", String.format("OAuth %s", accessToken));
+             HTTP_SYNC.setHeader("Authorization", String.format("OAuth %s", accessToken));
         } else {
             HTTP_ASYNC.removeHeader("Authorization");
-            HTTP_SYNC.removeHeader("Authorization");
+             HTTP_SYNC.removeHeader("Authorization");
         }
     }
 
@@ -90,10 +90,10 @@ public abstract class AbstractResource {
     public void setClientId(String clientId) {
         if (clientId != null && clientId.length() > 0) {
             HTTP_ASYNC.setHeader("Client-ID", clientId);
-            HTTP_SYNC.setHeader("Client-ID", clientId);
+             HTTP_SYNC.setHeader("Client-ID", clientId);
         } else {
             HTTP_ASYNC.removeHeader("Client-ID");
-            HTTP_SYNC.removeHeader("Client-ID");
+             HTTP_SYNC.removeHeader("Client-ID");
         }
     }
 
