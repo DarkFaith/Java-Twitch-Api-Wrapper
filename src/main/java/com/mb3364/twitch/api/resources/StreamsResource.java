@@ -42,14 +42,12 @@ public class StreamsResource extends AbstractResource
         @Override
         public void onFailure(int statusCode, String statusMessage, String errorMessage)
         {
-            System.out.println("Twitch API get failed: " + statusCode);
             setLastRequestSuccessful(false);
         }
 
         @Override
         public void onFailure(Throwable throwable)
         {
-            System.out.println("Twitch API get failed (throw): " + throwable.getMessage());
             setLastRequestSuccessful(false);
         }
     };
@@ -58,7 +56,6 @@ public class StreamsResource extends AbstractResource
         @Override
         public void onSuccess(int statusCode, Map<String, List<String>> headers, String content) {
             try {
-                System.out.println(content);
                 StreamContainer value = objectMapper.readValue(content, StreamContainer.class);
                 streamResponseHandler.onSuccess(value.getStream());
             } catch (IOException e) {
@@ -97,7 +94,6 @@ public class StreamsResource extends AbstractResource
     public Stream get(String channelName) {
         String url = String.format("%s/streams/%s", getBaseUrl(), channelName);
         HTTP_SYNC.get(url, twitchHttpResponseHandler);
-        System.out.println(stream);
         if (isLastRequestSuccessful())
             return stream;
         else
